@@ -1,0 +1,30 @@
+version: '3.8'
+services:
+  backup-queue:
+    image: redis:7.0.4-alpine
+    restart: always
+    ports:
+      - 6379
+    command: redis-server --save 20 1 --loglevel warning --requirepass password
+    volumes: 
+      - backup-queue:/data
+  backup_app:
+    container_name: backup_app
+    restart: always
+    depends_on: 
+      - backup-queue
+    links: 
+      - backup-queue      
+    build:
+      context: .
+      target: dependencies
+    env_file:
+      - .env
+    volumes:
+      - backup_app:/backups
+    command: bash backup.sh
+volumes:
+    backup-queue:
+      driver: local
+    backup_app: 
+      driver: local
