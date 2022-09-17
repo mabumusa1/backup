@@ -18,8 +18,6 @@ COPY backup.sh ./backup.sh
 RUN chown docker:docker ./backup.sh
 RUN chmod u+x ./backup.sh
 
-
-
 FROM base AS dependencies
 USER docker
 CMD ["bin/bash", "/backup.sh"]
