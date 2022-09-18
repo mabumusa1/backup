@@ -1,48 +1,38 @@
 version: '3.8'
 
 services:
-  queue:
-    image: redis:7.0.4-alpine
+  db:
+    image: mariadb:latest
+    container_name: laravel_db
     restart: always
     ports:
-      - 6379
-    command: redis-server --save 20 1 --loglevel warning --requirepass password
-    volumes: 
-      - queue:/data
-
-  tester:
-    container_name: tester
-    restart: unless-stopped
-    depends_on: 
-      - queue
-    links: 
-      - queue      
-    build:
-      context: ./tester/      
+      - 3306 
     environment:
-      REDIS_PORT: 6379
-      REDIS_HOST: queue
-      REDIS_PASSWORD: password
+      MYSQL_DATABASE: db
+      MYSQL_ROOT_PASSWORD: db
+    volumes:
+       - ./db:/var/lib/mysql
+       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
 
   app:
     container_name: app
     restart: unless-stopped
     init: true
     depends_on: 
-      - queue
+      - db
     links: 
-      - queue      
+      - db      
     build:
-      context: .      
-    environment:
-      REDIS_PORT: 6379
-      REDIS_HOST: queue
-      REDIS_PASSWORD: password
+      context: .
+    env_file:
+      .env
     volumes:
-      - app:/backups
+      - ./backups:/tmp
 
 volumes:
-    queue:
+    db:
       driver: local
-    app: 
+    app:
       driver: local
+      
