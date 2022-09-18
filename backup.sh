@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-DATE_YYMMDD=`TZ='UTC' date "+%Y-%m-%d %H:%M:%S %Z"`
+DATE_YYMMDD=`TZ='UTC' date "+%Y-%m-%d_%H:%M:%S_%Z"`
 
 ## Below should be parameters:
 #CLIENT_NAME='stgiabaustralia'
@@ -37,21 +37,28 @@ fi
 # Begin script in case all parameters are correct
 echo "Backup started for $CLIENT_NAME as $BACKUP_SOURCE backup."
 
-mkdir -p ${TMP_PATH}/${CLIENT_NAME} || exit 239;
+mkdir -p ${TMP_PATH}/${CLIENT_NAME} #|| exit 239;
 
-mysqldump -h${DB_HOST} -u${DB_USERNAME} -p${DB_PASSWORD} --lock-tables=false -B ${CLIENT_NAME} | gzip -c >  ${TMP_PATH}/${CLIENT_NAME}/db.sql.gz  || exit 241;
+mysqldump -h${DB_HOST} -u${DB_USERNAME} -p${DB_PASSWORD} --lock-tables=false -B ${CLIENT_NAME} | gzip -c >  ${TMP_PATH}/${CLIENT_NAME}/db.sql.gz  #|| exit 241;
 
 aws s3 cp ${TMP_PATH}/${CLIENT_NAME}/db.sql.gz s3://${S3_BUCKET}/${CLIENT_NAME}/${BACKUP_SOURCE}/${DATE_YYMMDD}/ --storage-class ${S3_STORAGE_CLASS} #|| exit 244;
 
-#kubectl exec ${CLIENT_NAME}-0 -- tar cf - /code | tar xf - -C ${TMP_PATH}/${CLIENT_NAME} || exit 240;
-#tar -zcf ${TMP_PATH}/${CLIENT_NAME}/code.tar.gz ${TMP_PATH}/${CLIENT_NAME}/code || exit 243;
-#aws s3 cp ${TMP_PATH}/${CLIENT_NAME}/code.tar.gz s3://${S3_BUCKET}/${CLIENT_NAME}/${BACKUP_SOURCE}/${DATE_YYMMDD}/ --storage-class ${S3_STORAGE_CLASS} || exit 245;
+
+#kubectl config view
+#kubectl describe -n kube-system configmap/aws-auth
+#cat ~/.kube/config
+
+kubectl exec ${CLIENT_NAME}-0 -c ${CLIENT_NAME} -- tar cf - /code | tar xf - -C ${TMP_PATH}/${CLIENT_NAME}
+
+tar -zcf ${TMP_PATH}/${CLIENT_NAME}/code.tar.gz ${TMP_PATH}/${CLIENT_NAME}/code 
+aws s3 cp ${TMP_PATH}/${CLIENT_NAME}/code.tar.gz s3://${S3_BUCKET}/${CLIENT_NAME}/${BACKUP_SOURCE}/${DATE_YYMMDD}/ --storage-class ${S3_STORAGE_CLASS} 
 
 
 
 ## curl http:/laravel.app/backup-done/${CLIENT_NAME}?s3uri=s3://${S3_BUCKET}/${CLIENT_NAME}/${BACKUP_SOURCE}/${DATE_YYMMDD}/
 
-#echo "Backup completed for $CLIENT_NAME as $BACKUP_SOURCE backup."
+echo "Backup completed for $CLIENT_NAME as $BACKUP_SOURCE backup."
+
 #exit 0;
 
 ## ADD COMMAND TO UPDATE THE DATABASE WITH THE BACKUP ID AND STATUS

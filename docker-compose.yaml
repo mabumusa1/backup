@@ -17,7 +17,7 @@ services:
 
   app:
     container_name: app
-    restart: unless-stopped
+#    restart: unless-stopped
     init: true
     depends_on: 
       - db
