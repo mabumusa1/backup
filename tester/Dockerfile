@@ -6,6 +6,6 @@ RUN apk add --no-cache --upgrade redis
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-COPY backup.sh /backup.sh
-RUN chmod +x /backup.sh
+COPY test.sh /test.sh
+RUN chmod +x /test.sh
 CMD ["/entrypoint.sh"]
