@@ -3,6 +3,8 @@
 
 set -e
 
+ls -lh
+
 cat <<EOT >> .aws/credentials
 [default]
 aws_access_key_id = $AWS_ACCESS_KEY_ID
@@ -45,11 +47,17 @@ done
 
 # Get the records
 #aws --version
-mysql -h$DB_HOST -u$DB_USERNAME -p$DB_PASSWORD -D "db" -NBe "select installs.name, backups.id, backups.type from installs left join backups on installs.id = backups.install_id where backups.status = 'creating' and installs.id= 13;" | while read -r name id type;
+
+echo "Backup started for requested clients."
+
+mysql -h$DB_HOST -u$DB_USERNAME -p$DB_PASSWORD -D $DB_DATABASE -NBe "select installs.name, backups.id, backups.type from installs left join backups on installs.id = backups.install_id where backups.status = 'initial';" | while read -r name id type;
 do
     bash backup.sh -n $name -s $type -i $id
 done
-sleep 5
+
+echo "Backup completed for All."
+
+#sleep 5
 
 exit 0
 

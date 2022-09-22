@@ -29,3 +29,16 @@ There are two containers used in this system:
 ```docker exec -it app /usr/local/bin/bash```
 2. access the database that contains a dump of mySQL database
 ```mysql -h $DB_HOST -u root -p$DB_PASSWORD```
+
+
+
+# To Build and run locally
+docker compose build
+docker compose up
+
+
+# Build and Push to AWS ECR:
+docker build -t backup_sc .
+docker tag backup_sc:latest 111222333444.dkr.ecr.ap-south-1.amazonaws.com/backup_sc:latest
+aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 111222333444.dkr.ecr.ap-south-1.amazonaws.com
+docker push 111222333444.dkr.ecr.ap-south-1.amazonaws.com/backup_sc:latest

@@ -1039,7 +1039,8 @@ ALTER TABLE `accounts`
 --
 ALTER TABLE `account_user`
   ADD CONSTRAINT `account_user_account_id_foreign` FOREIGN KEY (`account_id`) REFERENCES `accounts` (`id`),
-  ADD CONSTRAINT `account_user_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+--  ADD CONSTRAINT `account_user_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+;
 
 --
 -- Constraints for table `activity_log`
